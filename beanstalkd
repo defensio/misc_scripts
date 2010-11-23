@@ -1,0 +1,101 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:		beanstalkd
+# Required-Start:	$remote_fs $syslog
+# Required-Stop:	$remote_fs $syslog
+# Default-Start:	2 3 4 5
+# Default-Stop:		1
+# Short-Description:	Beanstalk queue server
+### END INIT INFO
+
+EXEC=/opt/beanstalkd/bin
+PIDFILE=/var/run/beanstalkd.pid
+BINLOG_PATH=/mnt/beanstalkd-binlog
+#OPTS="-b $BINLOG_PATH -z 1048576"
+
+set -e
+
+. /lib/lsb/init-functions
+
+test -x $EXEC || exit 0
+mkdir -p $BINLOG_PATH
+
+export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
+
+case "$1" in
+  start)
+	log_daemon_msg "Starting Beanstalk job queue" "beanstalkd"
+	if start-stop-daemon --start --quiet --oknodo --make-pidfile --background --pidfile $PIDFILE --exec $EXEC -- $OPTS; then
+	    log_end_msg 0
+	else
+	    log_end_msg 1
+	fi
+	;;
+  stop)
+	log_daemon_msg "Stopping Beanstalk job queue" "beanstalkd"
+	if start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE; then
+	    log_end_msg 0
+	else
+	    log_end_msg 1
+	fi
+	;;
+
+  reload|force-reload)
+	log_daemon_msg "Reloading Beanstalk job queue" "beanstalkd"
+	if start-stop-daemon --stop --signal 1 --quiet --oknodo --make-pidfile --background --pidfile $PIDFILE --exec $EXEC; then
+	    log_end_msg 0
+	else
+	    log_end_msg 1
+	fi
+	;;
+
+  restart)
+	log_daemon_msg "Restarting Beanstalk job queue" "beanstalkd"
+	start-stop-daemon --stop --quiet --oknodo --retry 30 --pidfile $PIDFILE
+	if start-stop-daemon --start --quiet --oknodo --make-pidfile --background --pidfile $PIDFILE --exec $EXEC -- $OPTS; then
+	    log_end_msg 0
+	else
+	    log_end_msg 1
+	fi
+	;;
+
+  try-restart)
+	log_daemon_msg "Restarting Beanstalk job queue" "beanstalkd"
+	set +e
+	start-stop-daemon --stop --quiet --retry 30 --pidfile $PIDFILE
+	RET="$?"
+	set -e
+	case $RET in
+	    0)
+		# old daemon stopped
+		if start-stop-daemon --start --quiet --oknodo --make-pidfile --background --pidfile $PIDFILE --exec $EXEC -- $OPTS; then
+		    log_end_msg 0
+		else
+		    log_end_msg 1
+		fi
+		;;
+	    1)
+		# daemon not running
+		log_progress_msg "(not running)"
+		log_end_msg 0
+		;;
+	    *)
+		# failed to stop
+		log_progress_msg "(failed to stop)"
+		log_end_msg 1
+		;;
+	esac
+	;;
+
+  status)
+        status_of_proc -p $PIDFILE $EXEC beanstalkd && exit 0 || exit $?
+        ;;
+
+  *)
+        log_action_msg "Usage: /etc/init.d/beanstalk {start|stop|reload|force-reload|restart|try-restart|status}"
+        exit 1
+esac
+
+exit 0
+
