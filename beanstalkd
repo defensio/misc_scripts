@@ -9,7 +9,7 @@
 # Short-Description:	Beanstalk queue server
 ### END INIT INFO
 
-EXEC=/opt/beanstalkd/bin
+EXEC=/opt/beanstalkd/bin/beanstalkd
 PIDFILE=/var/run/beanstalkd.pid
 BINLOG_PATH=/mnt/beanstalkd-binlog
 #OPTS="-b $BINLOG_PATH -z 1048576"
