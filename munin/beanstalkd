@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+# Taken and slightly modified from https://gist.github.com/169876/bf1d40f6e0e3dffa1ee9675a62e9dd918f652d3e
+
+require 'rubygems'
+require 'beanstalk-client'
+
+if ARGV.length > 0 && ARGV[0] == 'config'
+  puts "graph_title Beanstalk Queue Size"
+  puts "graph_vlabel watching"
+  puts "watching.label Watching"
+  puts "graph_vlabel reserved"
+  puts "reserved.label Reserved"
+  puts "graph_vlabel ready"
+  puts "ready.label Ready"
+  puts "graph_vlabel using"
+  puts "using.label Using"
+  puts "graph_vlabel buried"
+  puts "buried.label Buried"
+  puts "graph_vlabel waiting"
+  puts "waiting.label Waiting"
+  puts "graph_vlabel delayed"
+  puts "delayed.label Delayed"
+  puts "graph_vlabel urgent"
+  puts "urgent.label Urgent"
+  exit(0)
+end
+
+B = Beanstalk::Connection.new 'localhost:11300'
+
+tubes = B.list_tubes
+
+stats = {'current-watching' => 0, 'current-jobs-reserved' => 0, 'current-jobs-ready' => 0,
+         'current-using' => 0, 'current-jobs-buried' => 0, 'current-waiting' => 0,
+         'current-jobs-delayed' => 0, 'current-jobs-urgent' => 0 }
+
+tubes.each do |tube|
+  ts = B.stats_tube(tube)
+  ts.keys.sort.each do |key|
+    next unless stats.has_key?(key)
+    stats[key] += ts[key]
+  end
+end
+
+stats.each_pair do |name, value|
+  p "#{name.split('-').last}.value #{value}"
+end
