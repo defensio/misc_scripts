@@ -1,0 +1,38 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  echo "You must specify which directory to use."
+  echo "eg: ./switch-mongo mongodb-linux-x86_64-1.6.5-rc1"
+  exit 1
+fi
+
+if [ ! -d "/opt/$1" ]; then
+  echo "Directory /opt/$1 doesn't exist. Cannot continue."
+  exit 1
+fi
+
+echo "This script will switch MongoDB over to '$1'."
+echo "To approve, type 'yes'. Otherwise, press ENTER.."
+read approval
+
+if [ -z "$approval" ] || [ "$approval" != "yes" ]; then
+  echo "See ya!"
+  exit 1
+else
+  echo "Let's do it!"
+fi
+
+echo "Stopping MongoDB..."
+/etc/init.d/mongod stop
+sleep 3
+
+echo "Removing previous symlink..."
+rm /opt/mongodb
+echo "Creating new symlink..."
+ln -s /opt/$1 /opt/mongodb
+echo "Starting MongoDB..."
+/etc/init.d/mongod start
+
+echo "Grepping PS AUX for MongoDB."
+ps aux | grep mongod
+echo "Done!"
