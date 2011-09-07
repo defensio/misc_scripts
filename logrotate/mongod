@@ -3,11 +3,11 @@
         rotate 30
         compress
         dateext
- 
+ 
     missingok
     notifempty
     sharedscripts
     postrotate
-        /bin/kill -SIGUSR1 `cat /vol/mongodb-data/mongod.lock 2> /dev/null` 2> /dev/null || true
+        /bin/kill -SIGUSR1 `cat /var/run/mongod.pid 2> /dev/null` 2> /dev/null || true
     endscript
 }
