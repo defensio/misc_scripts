@@ -23,7 +23,7 @@ DAEMON=$MONGOPATH/bin/$NAME
 #Please do not forget to give correct path
 DBPATH=$MONGOPATH-data/
 #If security matters, please change arg to --auth
-DAEMON_ARGS="--dbpath $DBPATH --noauth --notablescan --logappend --logpath /mnt/mongo.log -v --oplogSize=10000 --rest --replSet defensio --fastsync"
+DAEMON_ARGS="--dbpath $DBPATH --noauth --notablescan --logappend --logpath /mnt/mongo.log -v --oplogSize=10000 --rest --replSet defensio"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
