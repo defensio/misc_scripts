@@ -1,11 +1,11 @@
 /var/log/nginx/*.log {
-  daily
-  missingok
-  rotate 10
-  compress
-  delaycompress
-  notifempty
-  postrotate
-    test ! -f /opt/nginx/logs/nginx.pid || kill -USR1 `cat /opt/nginx/logs/nginx.pid`
-  endscript
+   missingok
+   rotate 5
+   size 250M
+   compress
+   #delaycompress
+   notifempty
+   postrotate
+      [ ! -f /var/run/nginx.pid ] || service nginx reload
+   endscript
 }
